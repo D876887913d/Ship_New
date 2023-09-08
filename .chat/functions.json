@@ -129,6 +129,20 @@
         }
     },
     {
+        "name": "ask_codebase",
+        "description": "Ask question about codebase.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "question": {
+                    "type": "string",
+                    "description": "selected question"
+                }
+            },
+            "required": []
+        }
+    },
+    {
         "name": "finish_task",
         "description": "Flag task as finished",
         "parameters": {
@@ -231,6 +245,20 @@
                 "exclude_files": {
                     "type": "string",
                     "description": "search text not within setting exclude files, support multi pattern. The parameter format is based on the corresponding configuration in vscode search."
+                }
+            },
+            "required": []
+        }
+    },
+    {
+        "name": "summary",
+        "description": "Get summary of specified file or direcotry in workspace",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "The relative path of the specified file or folder, for example, /hello.py, represents the hello.py file in the root directory. This arg is required."
                 }
             },
             "required": []
