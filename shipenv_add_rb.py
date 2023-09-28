@@ -42,6 +42,8 @@ class Agent():
 
         self.is_lure=False
         self.is_disturb=False
+
+        self.lured=False
        
         self.state = AgentState()
         self.action = Action()
@@ -74,7 +76,8 @@ class Environment:
         act_dim_list=[2, 2,   3,   3]
 
         # 蓝A，红A，红B1(诱骗)，红B2(干扰)颜色分别如下
-        colors = [(100, 100, 255),(255, 100, 100),(255,150,150),(255,100,100)]
+        # colors = [(100, 100, 255),(255, 100, 100),(255,150,150),(255,100,100)]
+        colors = [(100, 100, 255),(255, 100, 100),(0,0,0),(255,100,100)]
 
         # 蓝A，红A，红B1(诱骗)，红B2(干扰)诱骗功能除了红B1均为false
         islure=[False,False,True,False]
@@ -164,19 +167,17 @@ class Environment:
         return state
     
     def set_actions(self,actions_n):
-        for i in range(self.num_agents):
-            if i==0:
-                self.agents[i].action.acclr,self.agents[i].action.angle_change=self.action_space[0].sample()
-            else:
-                self.agents[i].action.acclr=actions_n[i-1][0]
-                self.agents[i].action.angle_change=actions_n[i-1][1]
+        for i in range(1,self.num_agents):
+        
+            self.agents[i].action.acclr=actions_n[i-1][0]
+            self.agents[i].action.angle_change=actions_n[i-1][1]
 
-                # 一般来说就一个额外的动作
-                if self.agents[i].is_disturb:
-                    self.agents[i].action.d_disturb=actions_n[i-1][2]
-                
-                if self.agents[i].is_lure:
-                    self.agents[i].action.d_lure=actions_n[i-1][2]
+            # 一般来说就一个额外的动作
+            if self.agents[i].is_disturb:
+                self.agents[i].action.d_disturb=actions_n[i-1][2]
+            
+            if self.agents[i].is_lure:
+                self.agents[i].action.d_lure=actions_n[i-1][2]
 
             self.exec_actions(i)
 
@@ -192,6 +193,31 @@ class Environment:
 
     # 对指定智能体进行状态调整
     def exec_actions(self,i):
+        self.agents[0].lured = False
+        for j in range(self.num_agents):
+            self.agents[j].size=self.size[j]
+
+        # if self.agents[i].state.disturb==1:
+        #     for j in range(self.num_agents):
+        #         if j!=i:
+        #             # 使用距离相关的缩放因子，来更新智能体 `j` 的探测范围
+        #             self.agents[j].size=self.size[j]*(1-1/self.get_distance(self.agents[i],self.agents[j]))*0.5
+
+        if self.agents[i].is_lure:
+            # 获取诱骗目标的位置
+            lure_target_x, lure_target_y = self.agents[i].state.p_posx,self.agents[i].state.p_posy  # 实现此函数以获取诱骗目标的位置
+
+            # 计算朝向诱骗目标的方向角
+            target_direction = np.arctan2(lure_target_y - self.agents[0].state.p_posy, lure_target_x - self.agents[0].state.p_posx)
+
+            # 计算朝向诱骗目标的动作
+            desired_angle_change = target_direction - self.agents[0].state.p_direct
+
+            # 让蓝色非智能体直接指向诱骗目标
+            self.agents[0].action.angle_change = desired_angle_change
+
+            self.agents[0].lured = True
+
         # 速度变化量=加速度*时间
         self.agents[i].state.p_vel+=self.agents[i].action.acclr*self.dt
 
@@ -207,25 +233,31 @@ class Environment:
 
         # 诱骗状态 = 动作中诱骗的数值 0/1
         self.agents[i].state.lure=self.agents[i].action.d_lure
-        
-        if self.agents[i].state.disturb==1:
-            for j in range(self.num_agents):
-                if j!=i:
-                    # 使用距离相关的缩放因子，来更新智能体 `j` 的探测范围
-                    self.agents[j].size=self.size[j]*(1-1/self.get_distance(self.agents[i],self.agents[j]))*0.5
 
-        if self.agents[i].state.lure==1:
-            # 获取诱骗目标的位置
-            lure_target_x, lure_target_y = self.agents[i].state.p_posx,self.agents[i].state.p_posy  # 实现此函数以获取诱骗目标的位置
+    def set_blue(self):
+        # 设定非智能体蓝A的响应状态
+        blue = self.agents[0]
+        if blue.lured == True:
+            self.agents[0].action.acclr,_=self.action_space[0].sample()
+        else:
+            self.agents[0].action.acclr,self.agents[0].action.angle_change=self.action_space[0].sample()
 
-            # 计算朝向诱骗目标的方向角
-            target_direction = np.arctan2(lure_target_y - self.agents[0].state.p_posy, lure_target_x - self.agents[0].state.p_posx)
+        # 速度变化量=加速度*时间
+        self.agents[0].state.p_vel+=self.agents[0].action.acclr*self.dt
 
-            # 计算朝向诱骗目标的动作
-            desired_angle_change = target_direction - self.agents[0].state.p_direct
+        # 方向变化量=角速度 * 时间
+        self.agents[0].state.p_direct+=self.agents[0].action.angle_change*self.dt
 
-            # 让蓝色非智能体直接指向诱骗目标
-            self.agents[0].action.angle_change = desired_angle_change
+        # 位置变化量=速度*sin或者cos*时间
+        self.agents[0].state.p_posx+=self.agents[0].state.p_vel*np.cos(self.agents[0].state.p_direct) * self.dt
+        self.agents[0].state.p_posy+=self.agents[0].state.p_vel*np.sin(self.agents[0].state.p_direct) * self.dt
+
+        # 干扰状态 = 动作中干扰的数值 0/1
+        self.agents[0].state.disturb=self.agents[0].action.d_disturb
+
+        # 诱骗状态 = 动作中诱骗的数值 0/1
+        self.agents[0].state.lure=self.agents[0].action.d_lure
+
 
     
     def reset(self):
@@ -247,7 +279,9 @@ class Environment:
         return self.get_obs()
 
     def step(self, actions_n):
-        self.set_actions(actions_n)
+        self.set_actions(actions_n) 
+
+        self.set_blue()
 
         state=self.get_obs()
         reward=self.reward()
