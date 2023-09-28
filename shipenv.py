@@ -7,12 +7,12 @@ from gym.spaces import Box,Discrete
 from pyglet.window import Window
 
 class Environment:
-    def __init__(self, num_agents=2):
+    def __init__(self, num_agents=4):
         self.num_agents = num_agents
         # Assuming the coordinate values range from -10 to 10,
         # speed values range from -5 to 5, and angle values range from -pi to pi
-        self.observation_space = Box(low=np.array([-50, -50, 0, -np.pi]*num_agents), 
-                                     high=np.array([50, 50, 5, np.pi]*num_agents), dtype=np.float32)
+        self.observation_space = Box(low=np.array([-50, -50, 0, -np.pi]*num_agents, dtype=np.float32),
+                                     high=np.array([50, 50, 5, np.pi]*num_agents, dtype=np.float32), dtype=np.float32)
 
         # 红A智能体的最大速度为0.926km/min，为了省事，保留一位小数
         # 蓝色智能体的最大的速度1.2347km/min
@@ -20,6 +20,10 @@ class Environment:
 
         self.observation_space.low[6] = 12.3
         self.observation_space.high[6] = 12.3
+
+        # 红B智能体的最大速度为0.463-0.5556km/min，这里取0.55
+        self.observation_space.high[10] = 5.5
+        self.observation_space.high[14] = 5.5
 
         # Assuming the acceleration values range from -2 to 2, and angle change values range from -pi/4 to pi/4
         self.action_space = Box(low=np.array([0, -np.pi/2]*num_agents), 
@@ -29,11 +33,15 @@ class Environment:
         self.action_space.low[2] = 0
         self.action_space.high[2] = 0
 
+        # 红A的加速度为0.02m/s^2=72m/min^2,红B和红A加速度相同
         self.action_space.high[0] = 0.72
+        self.action_space.high[4] = 0.72
+        self.action_space.high[6] = 0.72
 
-        self.sizes = [45, 10] 
+        # 探测范围，依次是红A，蓝A，红B1，红B2
+        self.sizes = [45, 10, 30, 30]
 
-        self.state = np.zeros(num_agents * 4)       
+        self.state = np.zeros(num_agents * 4)
         self.dt=1/60
 
         self.reset()
@@ -48,7 +56,10 @@ class Environment:
 
     def reset(self):
         # Set the initial velocities for the red and blue agents
-        initial_velocities = [1.8, 12.3]
+        # 红A的初始速度为11.112km/h=0.1852km/min
+        # 蓝A的初始速度为74.08km/h=1.2347km/min
+        # 红B的初始速度为11.112km/h=0.1852km/min
+        initial_velocities = [1.8, 12.3, 1.8, 1.8]
 
         # Set the initial state of each agent
         for i in range(self.num_agents):
@@ -99,8 +110,8 @@ class Environment:
     
     # 红色智能体（逃避者）的目标是尽可能远离蓝色智能体（追逐者），而蓝色智能体的目标是尽可能接近红色智能体。
     def reward(self, state):
-        # Assuming the state is [x_blue, y_blue, v_blue, angle_blue, x_red, y_red, v_red, angle_red]
-        x_blue, y_blue, _, angle_blue, x_red, y_red, _, _ = state
+        # Assuming the state is [x_blue, y_blue, v_blue, angle_blue, x_red, y_red, v_red, angle_red, x_B1, y_B1, v_B1, angle_B1, x_B2, y_B2, v_B2, angle_B2]
+        x_blue, y_blue, _, angle_blue, x_red, y_red, _, _, x_B1, y_B1, v_B1, angle_B1, x_B2, y_B2, v_B2, angle_B2 = state
 
         # Calculate the distance between the blue and red agents
         distance = np.sqrt((x_blue - x_red)**2 + (y_blue - y_red)**2)
@@ -127,7 +138,11 @@ class Environment:
             # 如果蓝色智能体在红色智能体的探测范围之内的话，那么红色智能体的奖励值是减少的
             reward_red -= 5
 
-        return reward_red, reward_blue
+        # 红B的reward
+        reward_red_B1 = distance*0.1
+        reward_red_B2 = distance*0.1
+
+        return reward_red, reward_blue, reward_red_B1, reward_red_B2
     
 
     def render(self):
@@ -138,10 +153,10 @@ class Environment:
             self.window.clear()  # Clear the window with white color
             states = self.state.reshape((self.num_agents, 4))
             coordinates = states[:, :2]
-            colors = [(255, 100, 100), (100, 100, 255)]  # Warm red and blue
+            colors = [(255, 100, 100), (100, 100, 255), (255, 0, 0), (255, 0, 0)]  # Warm red and blue
             
             # Red agent is 4.5 times larger than blue agent
-            sizes=self.sizes
+            sizes = self.sizes
 
             for i, (x, y) in enumerate(coordinates):
                 circle = pyglet.shapes.Circle(x+400, y+400, sizes[i])
@@ -170,6 +185,7 @@ if __name__=="__main__":
             env.render()
             # print("智能体的状态：",env.state[:],"智能体的动作：",actions)
             # print(env.total_distance_blue)
+            print(env.state)
             i += 1
         else:
             pyglet.app.exit()
