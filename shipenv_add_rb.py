@@ -33,6 +33,7 @@ class Agent():
     def __init__(self):
         super(Agent, self).__init__()
         self.movable = True
+        self.min_speed = None
         self.max_speed = None
         self.accel =None
         self.size=None
@@ -148,7 +149,7 @@ class Environment:
             # 非诱骗、干扰功能智能体，状态包括：坐标x，坐标y，速度，朝向
             if not self.agents[i].is_disturb and not self.agents[i].is_lure:
                 state.append(np.array([self.agents[i].state.p_posx, self.agents[i].state.p_posy,
-                                      self.agents[i].state.p_vel,self.agents[i].state.p_direct]
+                                      self.agents[i].state.p_vel,self.agents[i].state.p_direct, 0.0]
                                       ))
                 
             # 诱骗功能智能体，状态包括：坐标x，坐标y，速度，朝向，诱骗
@@ -287,7 +288,7 @@ class Environment:
         reward=self.reward()
         done=[False for _ in range(1,self.num_agents)]
 
-        return np.array(state),np.array(reward),np.array(done)
+        return np.vstack(state),np.array(reward),np.array(done)
     
 
     def reward(self):
