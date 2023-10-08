@@ -33,6 +33,7 @@ class Agent():
     def __init__(self):
         super(Agent, self).__init__()
         self.movable = True
+        self.min_speed = None
         self.max_speed = None
         self.accel =None
         self.size=None
@@ -262,20 +263,42 @@ class Environment:
     
     def reset(self):
         # Set the initial velocities for the red and blue agents
-        initial_velocities = [12.3,1.8,1.8,1.8]
+        initial_velocities = [12.3, 1.8, 1.8, 1.8]
 
         # Set the initial state of each agent
         for i in range(self.num_agents):
-            self.agents[i].state.p_posx = np.random.uniform(-25, 25)
-            self.agents[i].state.p_posy = np.random.uniform(-25, 25)
             self.agents[i].state.p_direct = np.random.uniform(-np.pi, np.pi)
             self.agents[i].state.p_vel = initial_velocities[i]
+
+            if i == 1:  # 红A的初始化位置
+                self.agents[i].state.p_posx = 0
+                self.agents[i].state.p_posy = 0
+            elif i == 2:  # 红B1的初始化位置，位于红A左侧
+                # redA_x = self.agents[1].state.p_posx
+                # redA_y = self.agents[1].state.p_posy
+                redB1_x = np.random.uniform(-15, 15)
+                redB1_y = np.random.uniform(-15, 15)
+                self.agents[i].state.p_posx = redB1_x
+                self.agents[i].state.p_posy = redB1_y
+            elif i == 3:  # 红B2的初始化位置，位于红A右侧
+                # redA_x = self.agents[1].state.p_posx
+                # redA_y = self.agents[1].state.p_posy
+                redB2_x = -redB1_x
+                redB2_y = -redB1_y
+                self.agents[i].state.p_posx = redB2_x
+                self.agents[i].state.p_posy = redB2_y
+            else:
+                # 对于其他智能体，随机生成位置
+                self.agents[i].state.p_posx = np.random.uniform(-30, 30)
+                self.agents[i].state.p_posy = np.random.uniform(-30, 30)
+
+
             if self.agents[i].is_lure:
-                self.agents[i].state.lure=False
-            
+                self.agents[i].state.lure = False
+
             if self.agents[i].is_disturb:
-                self.agents[i].state.disturb=False
-        
+                self.agents[i].state.disturb = False
+
         return self.get_obs()
 
     def step(self, actions_n):
@@ -291,8 +314,29 @@ class Environment:
     
 
     def reward(self):
-        return [0 for i in range(1,self.num_agents)]
-    
+        rewards = []
+
+        # 计算蓝A与所有红B1和红B2之间的距离
+        distances_to_red_Bs = [self.get_distance(self.agents[0], self.agents[i]) for i in range(2, self.num_agents)]
+
+        # 找到距离蓝A最近的红B
+        closest_red_B_index = np.argmin(distances_to_red_Bs) + 2  # 加2是因为红B从第2个智能体开始
+
+        # 蓝A与最近的红B之间的距离
+        distance_to_closest_red_B = distances_to_red_Bs[closest_red_B_index - 2]
+
+        # 定义奖励，当距离越来越近时奖励为正
+        reward_for_blue_A = 1.0 / (1.0 + distance_to_closest_red_B)
+
+        # 分配奖励
+        for i in range(1, self.num_agents):
+            if i == closest_red_B_index:
+                rewards.append(reward_for_blue_A)
+            else:
+                # 其他智能体获得零奖励
+                rewards.append(0.0)
+
+        return rewards
 
     def render(self):
         self.window.set_visible(True)
