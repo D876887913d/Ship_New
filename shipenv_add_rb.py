@@ -207,11 +207,11 @@ class Environment:
         for j in range(self.num_agents):
             self.agents[j].size = self.size[j]
 
-        # if self.agents[i].state.disturb==1:
-        #     for j in range(self.num_agents):
-        #         if j!=i:
-        #             # 使用距离相关的缩放因子，来更新智能体 `j` 的探测范围
-        #             self.agents[j].size=self.size[j]*(1-1/self.get_distance(self.agents[i],self.agents[j]))*0.5
+        if self.agents[i].state.disturb==1:
+            for j in range(self.num_agents):
+                if j!=i:
+                    # 使用距离相关的缩放因子，来更新智能体 `j` 的探测范围
+                    self.agents[j].size=self.size[j]*(1-1/self.get_distance(self.agents[i],self.agents[j]))*0.5
 
         if self.agents[i].is_lure:
             # 获取诱骗目标的位置
@@ -222,10 +222,11 @@ class Environment:
                                           lure_target_x - self.agents[0].state.p_posx)
 
             # 计算朝向诱骗目标的动作
+            # 不太确定朝向到底应不应该加个pi
             desired_angle_change = target_direction - self.agents[0].state.p_direct
 
             # 让蓝色非智能体直接指向诱骗目标
-            self.agents[0].action.angle_change = desired_angle_change
+            self.agents[0].action.angle_change = desired_angle_change + np.pi
 
             self.agents[0].lured = True
 
