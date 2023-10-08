@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d060b7fe-55d2-49fc-b222-59aae4bb9ea1" name="Default Changelist" comment="" />
+    <list default="true" id="d060b7fe-55d2-49fc-b222-59aae4bb9ea1" name="Default Changelist" comment="测试了一些必要的配置文件">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,6 +25,14 @@
     <option name="CREATE_PULL_REQUEST_DEFAULT_BRANCH" value="master" />
     <option name="CREATE_PULL_REQUEST_DEFAULT_REPO_USER" value="D876887913d" />
     <option name="CREATE_PULL_REQUEST_DEFAULT_REPO_NAME" value="Ship_New" />
+  </component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="hiddenUrls">
+      <set>
+        <option value="git@github.com:D876887913d/Server.git" />
+        <option value="git@github.com:D876887913d/Ship_New.git" />
+      </set>
+    </option>
   </component>
   <component name="JupyterTrust" id="84dbee77-dbae-406a-946c-6b69f7bae81c" />
   <component name="ProjectId" id="2W1XfdB5Mwfy57ExbmIUgRiB8tn" />
@@ -48,7 +58,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1695901164424</updated>
-      <workItem from="1695901184103" duration="2780000" />
+      <workItem from="1695901184103" duration="3752000" />
+      <workItem from="1696738378748" duration="876000" />
     </task>
     <task id="LOCAL-00001" summary="1.添加了新的智能体，红B1红B2，并添加了其指定的功能。&#10;2.设定诱骗智能体在动作空间lure为1的时候，控制非智能体蓝A向着诱骗智能体方向移动。&#10;3.设定干扰智能体的作用为，距离干扰智能体越近干扰效果越强。">
       <created>1695903337474</created>
@@ -57,7 +68,14 @@
       <option name="project" value="LOCAL" />
       <updated>1695903337474</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="测试了一些必要的配置文件">
+      <created>1695904164480</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1695904164480</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -68,7 +86,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
@@ -76,17 +96,18 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="1.添加了新的智能体，红B1红B2，并添加了其指定的功能。&#10;2.设定诱骗智能体在动作空间lure为1的时候，控制非智能体蓝A向着诱骗智能体方向移动。&#10;3.设定干扰智能体的作用为，距离干扰智能体越近干扰效果越强。" />
-    <option name="LAST_COMMIT_MESSAGE" value="1.添加了新的智能体，红B1红B2，并添加了其指定的功能。&#10;2.设定诱骗智能体在动作空间lure为1的时候，控制非智能体蓝A向着诱骗智能体方向移动。&#10;3.设定干扰智能体的作用为，距离干扰智能体越近干扰效果越强。" />
+    <MESSAGE value="测试了一些必要的配置文件" />
+    <option name="LAST_COMMIT_MESSAGE" value="测试了一些必要的配置文件" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="345" y="12" key="CommitChangelistDialog2" timestamp="1695903335763">
+    <state x="345" y="12" key="CommitChangelistDialog2" timestamp="1695904540038">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="345" y="12" key="CommitChangelistDialog2/0.0.1536.864@0.0.1536.864" timestamp="1695903335763" />
-    <state x="147" y="69" key="DiffContextDialog" timestamp="1695901965695">
-      <screen x="0" y="0" width="1536" height="864" />
+    <state x="345" y="12" key="CommitChangelistDialog2/0.0.1536.864@0.0.1536.864" timestamp="1695904540038" />
+    <state x="147" y="69" width="1228" height="719" maximized="true" key="DiffContextDialog" timestamp="1696739263910">
+      <screen x="0" y="0" width="1536" height="816" />
     </state>
-    <state x="147" y="69" key="DiffContextDialog/0.0.1536.864@0.0.1536.864" timestamp="1695901965695" />
+    <state x="147" y="69" width="1228" height="719" maximized="true" key="DiffContextDialog/0.0.1536.864@0.0.1536.864" timestamp="1695904685752" />
     <state x="551" y="190" key="FileChooserDialogImpl" timestamp="1695903935442">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
@@ -95,22 +116,22 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="532" y="299" key="Github.CreatePullRequestDialog/0.0.1536.864@0.0.1536.864" timestamp="1695903032029" />
-    <state x="147" y="69" key="MergeDialog" timestamp="1695903222462">
+    <state x="147" y="69" key="MergeDialog" timestamp="1695904338672">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="147" y="69" key="MergeDialog/0.0.1536.864@0.0.1536.864" timestamp="1695903222462" />
-    <state x="477" y="148" key="MultipleFileMergeDialog" timestamp="1695903222480">
+    <state x="147" y="69" key="MergeDialog/0.0.1536.864@0.0.1536.864" timestamp="1695904338672" />
+    <state x="477" y="148" key="MultipleFileMergeDialog" timestamp="1695904338682">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="477" y="148" key="MultipleFileMergeDialog/0.0.1536.864@0.0.1536.864" timestamp="1695903222480" />
+    <state x="477" y="148" key="MultipleFileMergeDialog/0.0.1536.864@0.0.1536.864" timestamp="1695904338682" />
     <state x="272" y="77" key="SettingsEditor" timestamp="1695902779671">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="272" y="77" key="SettingsEditor/0.0.1536.864@0.0.1536.864" timestamp="1695902779671" />
-    <state x="361" y="165" key="Vcs.Push.Dialog.v2" timestamp="1695903350822">
+    <state x="361" y="165" key="Vcs.Push.Dialog.v2" timestamp="1695904568439">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="361" y="165" key="Vcs.Push.Dialog.v2/0.0.1536.864@0.0.1536.864" timestamp="1695903350822" />
+    <state x="361" y="165" key="Vcs.Push.Dialog.v2/0.0.1536.864@0.0.1536.864" timestamp="1695904568439" />
     <state x="93" y="93" width="1350" height="678" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog" timestamp="1695901990410">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
@@ -119,18 +140,19 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="93" y="93" width="1350" height="678" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.1536.864@0.0.1536.864" timestamp="1695903995350" />
-    <state x="461" y="260" key="com.intellij.ide.util.TipDialog" timestamp="1695901186826">
-      <screen x="0" y="0" width="1536" height="864" />
+    <state x="461" y="246" key="com.intellij.ide.util.TipDialog" timestamp="1696738383191">
+      <screen x="0" y="0" width="1536" height="816" />
     </state>
+    <state x="461" y="246" key="com.intellij.ide.util.TipDialog/0.0.1536.816@0.0.1536.816" timestamp="1696738383191" />
     <state x="461" y="260" key="com.intellij.ide.util.TipDialog/0.0.1536.864@0.0.1536.864" timestamp="1695901186826" />
     <state x="530" y="144" key="git4idea.branch.GitSmartOperationDialog" timestamp="1695901984244">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="530" y="144" key="git4idea.branch.GitSmartOperationDialog/0.0.1536.864@0.0.1536.864" timestamp="1695901984244" />
-    <state x="407" y="223" key="git4idea.merge.GitMergeDialog" timestamp="1695904120500">
+    <state x="407" y="223" key="git4idea.merge.GitMergeDialog" timestamp="1695904309501">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="407" y="223" key="git4idea.merge.GitMergeDialog/0.0.1536.864@0.0.1536.864" timestamp="1695904120500" />
+    <state x="407" y="223" key="git4idea.merge.GitMergeDialog/0.0.1536.864@0.0.1536.864" timestamp="1695904309501" />
     <state x="407" y="223" key="git4idea.merge.GitPullDialog" timestamp="1695903126373">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
