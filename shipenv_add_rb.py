@@ -253,6 +253,47 @@ class Environment:
             self.agents[0].action.acclr, _ = self.action_space[0].sample()
         else:
             self.agents[0].action.acclr, self.agents[0].action.angle_change = self.action_space[0].sample()
+            
+            closest_red_agent = None
+            min_distance = float('inf')
+
+            for agent in self.agents[1:]:
+                distance = self.get_distance(blue, agent)
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_red_agent = agent
+
+            if closest_red_agent is not None:
+                # 追逐最近的红A或红B1或红B2
+                target_direction = np.arctan2(closest_red_agent.state.p_posy - blue.state.p_posy,
+                                            closest_red_agent.state.p_posx - blue.state.p_posx)
+                desired_angle_change = target_direction - blue.state.p_direct
+
+                # 当蓝A和目标距离小于100m时
+                if min_distance < 1:
+                    # 进行再确认，如果是真正的红A，则继续追逐，直至距离小于等于20m
+                    if closest_red_agent == self.agents[1]:
+                        if min_distance <= 0.2:
+                            # 引爆
+                            blue.action.acclr = 0
+                            blue.action.angle_change = 0
+                        else:
+                            blue.action.angle_change = desired_angle_change
+                            blue.action.acclr = self.agents[0].max_speed / self.dt
+                    else:
+                        # 不是真正的红A，向与速度方向成90度的任一方向运动
+                        random_angle = blue.state.p_direct + np.pi / 2  # 90度
+                        if np.random.random() < 0.5:
+                            random_angle = blue.state.p_direct - np.pi / 2  # 90度
+
+                        blue.action.angle_change = random_angle - blue.state.p_direct
+                        blue.action.acclr = self.agents[0].max_speed / self.dt
+                else:
+                    blue.action.angle_change = desired_angle_change
+                    blue.action.acclr = self.agents[0].max_speed / self.dt
+            else:
+                # 如果没有找到红A或红B，则随机运动
+                blue.action.acclr, blue.action.angle_change = self.action_space[0].sample()
 
         # ======================= 非智能体的基础时间步长移动 ==========================
         # 速度变化量=加速度*时间
