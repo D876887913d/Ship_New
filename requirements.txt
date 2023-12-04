@@ -2,4 +2,4 @@ gym==0.23.1
 numpy==1.21.6
 pyglet==1.5.15
 six==1.15.0
-torch==1.10.0+cu113
+torch==1.10.0
