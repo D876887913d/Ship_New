@@ -2,8 +2,8 @@
  * @Author: gongweijing 876887913@qq.com
  * @Date: 2023-12-05 12:27:42
  * @LastEditors: gongweijing 876887913@qq.com
- * @LastEditTime: 2023-12-05 12:30:58
- * @FilePath: /gongweijing/Ship_New/HyAR/readme.md
+ * @LastEditTime: 2023-12-05 12:50:42
+ * @FilePath: /gongweijing/Ship_New/hyar/readme.md
  * @Description: 
  * 
  * Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
@@ -18,7 +18,12 @@
 
 # 复现训练环境搭建：
 ```
+pip install -r requirements.txt
+```
+
+```
 pip install -e git+https://github.com/cycraig/gym-platform#egg=gym_platform
 pip install -e git+https://github.com/cycraig/gym-goal#egg=gym_goal
 pip install -e git+https://github.com/cycraig/gym-soccer#egg=gym_soccer 
+
 ```
