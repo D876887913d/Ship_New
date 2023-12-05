@@ -2,8 +2,8 @@
  * @Author: gongweijing 876887913@qq.com
  * @Date: 2023-12-04 13:33:29
  * @LastEditors: gongweijing 876887913@qq.com
- * @LastEditTime: 2023-12-05 16:16:01
- * @FilePath: /root/Ship_New/readme.md
+ * @LastEditTime: 2023-12-05 22:53:13
+ * @FilePath: /gongweijing/Ship_New/readme.md
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 # Linux下进行项目部署
@@ -66,3 +66,7 @@ python3 shipenv_add_rb.py
 1. 蓝A仍非智能体，后续修改为2个红b和红B两种情况；
 2. 蓝A为智能体应当学习到要去追的目标；
 3. 
+
+
+## 一些能想到要改的点：
+### 红b(干扰)智能体加速度可以设定为0，观测范围0.
