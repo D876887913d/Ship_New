@@ -288,10 +288,8 @@ class Environment:
                             random_angle = blue.state.p_direct - np.pi / 2  # 90度
 
                         blue.action.angle_change = random_angle - blue.state.p_direct
-                        blue.action.acclr = self.agents[0].max_speed / self.dt
                 else:
                     blue.action.angle_change = desired_angle_change
-                    blue.action.acclr = self.agents[0].max_speed / self.dt
             else:
                 # 如果没有找到红A或红B，则随机运动
                 blue.action.acclr, blue.action.angle_change = self.action_space[0].sample()
