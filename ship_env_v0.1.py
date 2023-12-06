@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-06 01:06:50
+LastEditTime: 2023-12-06 21:25:40
 FilePath: /gongweijing/Ship_New/ship_env_v0.1.py
 Description: 
 
@@ -52,6 +52,14 @@ class Entity:
         self.angle_constraint()
         # 速度约束
         self.velocity_constraint()
+
+    def get_simulate_position(self):
+        draw_pos = [0,0]
+        draw_pos[0] = window.width // 2
+        draw_pos[1] = window.height // 2    
+        draw_pos[0] = draw_pos[0] + self.position[0] *DRAW_SCALE
+        draw_pos[1] = draw_pos[1] + self.position[1] *DRAW_SCALE
+        return draw_pos
         
     
     '''
@@ -95,6 +103,8 @@ class BlueA(Entity):
         self.accel_max = 0
         self.speed_max = segment_to_km_per_second(40)
         self.explore_size = 1
+
+        self.confirm_explore_size = 0.1
         # 最大航程为10km，转化为km/s之后，最大的可以行驶的时间步为485个。
         self.accel = 0
         self.velocity = segment_to_km_per_second(40)
@@ -129,7 +139,7 @@ class RedB2(Entity):
         self.color = (0,100,100)
         self.accel_max = 0
         self.speed_max = segment_to_km_per_second(17)
-        self.explore_size = 1
+        self.explore_size = 2
         self.accel = 0
         self.velocity = segment_to_km_per_second(17)
 
@@ -152,23 +162,25 @@ class ShipEnv(gym.Env):
         self.redA.velocity = segment_to_km_per_second(6)
         self.redA.angle = math.pi/2
         
-        self.redB1.position = np.array([segment_to_km_per_second(random.uniform(0.5,1)),0])
+        self.redB1.position = np.array([random.uniform(0.5,1),0])
         self.redB1.velocity = segment_to_km_per_second(6)
         self.redB1.angle = self.redA.angle # 随便选个角度
 
-        self.redB2.position = np.array([-segment_to_km_per_second(random.uniform(0.8,1.2)),0])
-        self.redB2.velocity = segment_to_km_per_second(17)
+        self.redB2.position = np.array([-random.uniform(0.8,1.2),0])
+        self.redB2.velocity = segment_to_km_per_second(6)
         self.redB2.angle = self.redA.angle # 随便选个角度
 
-        self.blueA.position = np.array([random.uniform(self.blueA.exlore_size/3,2*self.blueA.explore_size/3),0])
+        self.blueA.position = np.array([0,random.uniform(self.blueA.exlore_size/3,2*self.blueA.explore_size/3)])
         self.blueA.velocity = segment_to_km_per_second(40)
         self.blueA.angle = - self.redA.angle # 随便选个角度
 
 
+DRAW_SCALE = 40
 env = ShipEnv()
 env.reset()
 
 window = pyglet.window.Window()
+batch = pyglet.graphics.Batch()
 
 def entity_draw_comment(entity,base_y):
     rA_label = pyglet.text.Label(f'{entity.name}',
@@ -176,42 +188,51 @@ def entity_draw_comment(entity,base_y):
                             font_size=10,
                             color = (0,0,0,255),
                             x=0, y=window.height-4-base_y,
-                            anchor_x='left', anchor_y='top',                          
+                            anchor_x='left', anchor_y='top',
+                            batch=batch                          
                             )
-    rA_Circle = pyglet.shapes.Circle(250,window.height-12-base_y,7)
+    rA_Circle = pyglet.shapes.Circle(250,window.height-12-base_y,7,batch=batch)
     rA_Circle.color = entity.color
-    rA_Circle.opacity = 179
-    rA_label.draw()
-    rA_Circle.draw()
+    rA_Circle.opacity = 255
+    # rA_label.draw()
+    # rA_Circle.draw()
+    batch.draw()
 
-def entity_draw_body(entity):
-    draw_pos = [0,0]
-    draw_pos[0] = window.width // 2
-    draw_pos[1] = window.height // 2     
+def entity_draw_body():
+    draw_group = []    
+    draw_group.append(pyglet.shapes.Circle(env.redA.get_simulate_position()[0],env.redA.get_simulate_position()[1],env.redA.explore_size*DRAW_SCALE,batch=batch))
+    draw_group[0].opacity = 10
+    draw_group[0].color = env.redA.color
 
-    rA_Circle = pyglet.shapes.Circle(draw_pos[0],draw_pos[1],entity.explore_size*40)
-    rA_Circle.color = entity.color
-    rA_Circle.opacity = 179
-    rA_Circle.draw()
+    draw_group.append(pyglet.shapes.Circle(env.redB1.get_simulate_position()[0],env.redB1.get_simulate_position()[1],env.redB1.explore_size*DRAW_SCALE,batch=batch))
+    draw_group[1].opacity = 128
+    draw_group[1].color = env.redB1.color
+    
+    draw_group.append(pyglet.shapes.Circle(env.redB2.get_simulate_position()[0],env.redB2.get_simulate_position()[1],env.redB2.explore_size*DRAW_SCALE,batch=batch))
+    draw_group[2].opacity = 128
+    draw_group[2].color = env.redB2.color
 
-    rA_Circle = pyglet.shapes.Circle(draw_pos[0],draw_pos[1],1)
-    rA_Circle.color = (255,255,255)
-    rA_Circle.opacity = 179
-    rA_Circle.draw()
+    draw_group.append(pyglet.shapes.Circle(env.blueA.get_simulate_position()[0],env.blueA.get_simulate_position()[1],env.blueA.explore_size*DRAW_SCALE,batch=batch))
+    draw_group[3].opacity = 128
+    draw_group[3].color = env.blueA.color
+    batch.draw()
+
 
 @window.event
 def on_draw():
     pyglet.gl.glClearColor(1, 1, 1, 1)
     window.clear()
+    entity_list = [env.redA,env.redB1,env.redB2,env.blueA]
     entity_draw_comment(env.redA,0)
     entity_draw_comment(env.redB1,16)
     entity_draw_comment(env.redB2,16*2)
     entity_draw_comment(env.blueA,16*3)
 
-    entity_draw_body(env.redA)
-    entity_draw_body(env.redB1)
-    entity_draw_body(env.redB2)
-    entity_draw_body(env.blueA)
+    entity_draw_body()
+
+
+    for i in entity_list:
+        print(i.position)
 
 
 pyglet.app.run()
