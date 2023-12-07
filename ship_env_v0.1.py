@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-06 21:25:40
+LastEditTime: 2023-12-07 10:56:06
 FilePath: /gongweijing/Ship_New/ship_env_v0.1.py
 Description: 
 
@@ -22,6 +22,12 @@ def segment_to_km_per_second(seg):
     km_h = seg*1.852
     km_s = seg/3600 
     return km_s
+
+def norm(vec2d):
+    # from numpy.linalg import norm
+    # faster to use custom norm because we know the vectors are always 2D
+    assert len(vec2d) == 2
+    return math.sqrt(vec2d[0]*vec2d[0] + vec2d[1]*vec2d[1])
 
 class Entity:
     """ This is a base entity class, representing moving objects. """
@@ -93,6 +99,12 @@ class Entity:
             self.velocity = 0
         if self.velocity > self.speed_max:
             self.velocity = self.speed_max
+
+
+    def distance(self, other):
+        """ Computes the euclidean distance to another entity. """
+        return norm(self.position - other.position)
+
 
 
 class BlueA(Entity):
@@ -176,6 +188,7 @@ class ShipEnv(gym.Env):
 
 
 DRAW_SCALE = 40
+DRAW_POINT = 2
 env = ShipEnv()
 env.reset()
 
@@ -193,9 +206,7 @@ def entity_draw_comment(entity,base_y):
                             )
     rA_Circle = pyglet.shapes.Circle(250,window.height-12-base_y,7,batch=batch)
     rA_Circle.color = entity.color
-    rA_Circle.opacity = 255
-    # rA_label.draw()
-    # rA_Circle.draw()
+    rA_Circle.opacity = 128
     batch.draw()
 
 def entity_draw_body():
@@ -215,6 +226,24 @@ def entity_draw_body():
     draw_group.append(pyglet.shapes.Circle(env.blueA.get_simulate_position()[0],env.blueA.get_simulate_position()[1],env.blueA.explore_size*DRAW_SCALE,batch=batch))
     draw_group[3].opacity = 128
     draw_group[3].color = env.blueA.color
+    batch.draw()
+
+    draw_point = []
+    draw_point.append(pyglet.shapes.Circle(env.redA.get_simulate_position()[0],env.redA.get_simulate_position()[1],DRAW_POINT,batch=batch))
+    draw_point[0].opacity = 255
+    draw_point[0].color = (255,255,255)
+
+    draw_point.append(pyglet.shapes.Circle(env.redB1.get_simulate_position()[0],env.redB1.get_simulate_position()[1],DRAW_POINT,batch=batch))
+    draw_point[1].opacity = 255
+    draw_point[1].color = (255,255,255)
+    
+    draw_point.append(pyglet.shapes.Circle(env.redB2.get_simulate_position()[0],env.redB2.get_simulate_position()[1],DRAW_POINT,batch=batch))
+    draw_point[2].opacity = 255
+    draw_point[2].color = (255,255,255)
+
+    draw_point.append(pyglet.shapes.Circle(env.blueA.get_simulate_position()[0],env.blueA.get_simulate_position()[1],DRAW_POINT,batch=batch))
+    draw_point[3].opacity = 255
+    draw_point[3].color = (255,255,255)
     batch.draw()
 
 
