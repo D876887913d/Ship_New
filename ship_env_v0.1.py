@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-07 10:56:06
+LastEditTime: 2023-12-08 00:54:44
 FilePath: /gongweijing/Ship_New/ship_env_v0.1.py
 Description: 
 
@@ -29,12 +29,15 @@ def norm(vec2d):
     assert len(vec2d) == 2
     return math.sqrt(vec2d[0]*vec2d[0] + vec2d[1]*vec2d[1])
 
+def to_deg(rad):
+    return rad/(math.pi/180)
+
 class Entity:
     """ This is a base entity class, representing moving objects. """
     def __init__(self):
         self.accel_max = 0
         self.speed_max = 0
-        self.exlore_size = 0
+        self.explore_size = 0
         
         # 分别对应x,y的值
         self.position =       np.array([0., 0.])
@@ -104,6 +107,16 @@ class Entity:
     def distance(self, other):
         """ Computes the euclidean distance to another entity. """
         return norm(self.position - other.position)
+    
+    def angle_to_target(self, target):
+        delta = target.position - self.position
+        delta_mod = norm(delta)
+        to_angle = math.acos(delta[0])
+        if delta[1] >= 0:
+            to_angle = to_angle
+        else:
+            to_angle = -to_angle
+        return to_angle
 
 
 
@@ -115,13 +128,41 @@ class BlueA(Entity):
         self.accel_max = 0
         self.speed_max = segment_to_km_per_second(40)
         self.explore_size = 1
-
         self.confirm_explore_size = 0.1
+        self.boom_size = 0.02
         # 最大航程为10km，转化为km/s之后，最大的可以行驶的时间步为485个。
         self.accel = 0
         self.velocity = segment_to_km_per_second(40)
+        # 候选红A在candidated_red，find_true_flag=1的时候就不再判断直接去追,black_list是存被标记为红B1的
+        self.candidate_red = []
+        self.find_true_flag = 0
+        self.black_list = []
 
-
+    def reset(self):        
+        self.position = np.array([0,random.uniform(self.explore_size/3,2*self.explore_size/3)])
+        self.velocity = segment_to_km_per_second(40)
+        self.angle = - math.pi/2 # 随便选个角度
+    
+    def _update(self):
+        for i in self.candidate_red:
+            print(f'当前的候选红A的name为：{i.name}')
+        if len(self.candidate_red) == 1:
+            self.angle_velocity = self.angle_to_target(self.candidate_red[0])-self.angle
+        elif len(self.candidate_red) > 1:
+            min_dist = None
+            min_dist_agent = None
+            for i in self.candidate_red:
+                if not min_dist_agent:
+                    min_dist = self.distance(i)
+                    min_dist_agent = i
+                if self.distance(i) < min_dist:
+                    min_dist = self.distance(i)
+                    min_dist_agent = i
+            self.angle_velocity = self.angle_to_target(min_dist_agent)-self.angle
+            print(f'更近的一个智能体为:{min_dist_agent.name}')
+        self.update()
+        
+    
         
 class RedA(Entity):
     def __init__(self):
@@ -133,27 +174,40 @@ class RedA(Entity):
         self.speed_max = segment_to_km_per_second(30)
         self.explore_size = 4.5
 
+    def reset(self):
+        self.position = np.array([0,0])
+        self.velocity = segment_to_km_per_second(6)
+        self.angle = math.pi/2
+
 
 class RedB1(Entity):
     def __init__(self):
         super().__init__()
         self.name = 'Decoy agent - Red B1'
-        self.color = (255,0,110)
+        self.color = (255,50,110)
         # 加速度为:0.02m/s^2
         self.accel_max = 0.02 * 10**(-3)
         self.speed_max = segment_to_km_per_second(15)
         self.explore_size = 2
 
+    def reset(self):
+        self.position = np.array([random.uniform(0.5,1),0])
+        self.velocity = segment_to_km_per_second(6)
+        self.angle =  math.pi/2
+
 class RedB2(Entity):
     def __init__(self):
         super().__init__()
         self.name = 'Interfering agent - Red B2'
-        self.color = (0,100,100)
-        self.accel_max = 0
-        self.speed_max = segment_to_km_per_second(17)
+        self.color = (255,100,50)
+        self.accel_max = 0.02 * 10**(-3)
+        self.speed_max = segment_to_km_per_second(15)
         self.explore_size = 2
-        self.accel = 0
-        self.velocity = segment_to_km_per_second(17)
+
+    def reset(self):
+        self.position = np.array([-random.uniform(0.8,1.2),0])
+        self.velocity = segment_to_km_per_second(6)
+        self.angle =  math.pi/2
 
 class ShipEnv(gym.Env):
     def __init__(self):
@@ -161,6 +215,7 @@ class ShipEnv(gym.Env):
         self.redB1 = None
         self.redB2 = None
         self.blueA = None
+        self.done = False
         self.reset()
 
     def reset(self):
@@ -170,22 +225,31 @@ class ShipEnv(gym.Env):
         self.blueA = BlueA()
         # 假设三个红色智能体初始方向向上走，蓝色智能体在其前方explore_scopeB/3~2*explore_scopeB/3之间的范围
         # 且运动的方向为向下。
-        self.redA.position = np.array([0,0])
-        self.redA.velocity = segment_to_km_per_second(6)
-        self.redA.angle = math.pi/2
-        
-        self.redB1.position = np.array([random.uniform(0.5,1),0])
-        self.redB1.velocity = segment_to_km_per_second(6)
-        self.redB1.angle = self.redA.angle # 随便选个角度
+        self.redA.reset()
+        self.redB1.reset()
+        self.redB2.reset()
+        self.blueA.reset()
 
-        self.redB2.position = np.array([-random.uniform(0.8,1.2),0])
-        self.redB2.velocity = segment_to_km_per_second(6)
-        self.redB2.angle = self.redA.angle # 随便选个角度
 
-        self.blueA.position = np.array([0,random.uniform(self.blueA.exlore_size/3,2*self.blueA.explore_size/3)])
-        self.blueA.velocity = segment_to_km_per_second(40)
-        self.blueA.angle = - self.redA.angle # 随便选个角度
+    def red_in_explore_region(self):
+        for i in [self.redA,self.redB1]:
+            dist_i = self.blueA.distance(i)                            
+            if dist_i < self.blueA.explore_size:
+                if i not in self.blueA.candidate_red and i not in self.blueA.black_list:
+                    self.blueA.candidate_red.append(i)
+            if dist_i < self.blueA.confirm_explore_size:
+                if type(i) == RedA:
+                    self.blueA.find_true_flag = 1
+                else:
+                    self.blueA.candidate_list.remove(i)
+                    self.blueA.black_list.append(i)
+            if dist_i < self.blueA.boom_size:
+                self.done = True
 
+    def step(self):
+        self.red_in_explore_region()
+        self.blueA._update()
+            
 
 DRAW_SCALE = 40
 DRAW_POINT = 2
@@ -194,6 +258,7 @@ env.reset()
 
 window = pyglet.window.Window()
 batch = pyglet.graphics.Batch()
+
 
 def entity_draw_comment(entity,base_y):
     rA_label = pyglet.text.Label(f'{entity.name}',
@@ -258,10 +323,18 @@ def on_draw():
     entity_draw_comment(env.blueA,16*3)
 
     entity_draw_body()
+    # for i in entity_list:
+    #     print(i.position)
 
+i = 0
+def update(dt):
+    global i
+    if i < 488:
+        env.step()
+        if env.done:
+            pyglet.app.exit()
+        i += 1
 
-    for i in entity_list:
-        print(i.position)
-
+pyglet.clock.schedule_interval(update, 0.1)
 
 pyglet.app.run()

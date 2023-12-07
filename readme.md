@@ -2,7 +2,7 @@
  * @Author: gongweijing 876887913@qq.com
  * @Date: 2023-12-04 13:33:29
  * @LastEditors: gongweijing 876887913@qq.com
- * @LastEditTime: 2023-12-07 11:02:40
+ * @LastEditTime: 2023-12-08 00:25:19
  * @FilePath: /gongweijing/Ship_New/readme.md
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -69,7 +69,6 @@ python3 shipenv_add_rb.py
 
 
 ## 一些能想到要改的点：
-### 红b(干扰)智能体加速度可以设定为0，观测范围0.
 
 ### 绘图部分
 1. 由于红A的范围基本能囊括所有，所以设定为空心圆，圆心处绘制红色小点；
@@ -85,6 +84,10 @@ python3 shipenv_add_rb.py
 
 从编程的角度而言，各个智能体的坐标都是知道的，所以进行探测范围access的过程中，应当放到何处就比较重要了。 移动之前可以先判断一下，对于蓝色智能体的纯规则的可以先写一个相应的自动脚本，这个的话一般好理解。
 
+### 蓝色智能体
+1. 计算角度的变化量应该是多少，假设候选的A的坐标为A,那么B指向A的向量则为$\vec{BA}=\vec{OA}-\vec{OB}$。最终要达到的角度应当为acos(BA),当前的角度为angle_B,要想从angle_B变为acos(BA),那么就要：
+
+$$angle_B = angle_B + acos(BA)-angle_B$$
 
 ## 老师的思路
 先获取一个候选的redA_access的list或者是dict，对应的数据类型应当为entity，要添加的方法还包括获取与其他entity的距离。
