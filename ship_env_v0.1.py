@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-08 09:03:18
+LastEditTime: 2023-12-08 22:27:20
 FilePath: /gongweijing/Ship_New/ship_env_v0.1.py
 Description: 
 
@@ -338,8 +338,6 @@ def on_draw():
     entity_draw_comment(env.blueA,16*3)
 
     entity_draw_body()
-    # for i in entity_list:
-    #     print(i.position)
 
 i = 0
 env.reset()
