@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-08 00:54:44
+LastEditTime: 2023-12-08 09:03:18
 FilePath: /gongweijing/Ship_New/ship_env_v0.1.py
 Description: 
 
@@ -136,7 +136,10 @@ class BlueA(Entity):
         # 候选红A在candidated_red，find_true_flag=1的时候就不再判断直接去追,black_list是存被标记为红B1的
         self.candidate_red = []
         self.find_true_flag = 0
+        self.real_redA_by_find_flag =None
         self.black_list = []
+
+        
 
     def reset(self):        
         self.position = np.array([0,random.uniform(self.explore_size/3,2*self.explore_size/3)])
@@ -144,22 +147,26 @@ class BlueA(Entity):
         self.angle = - math.pi/2 # 随便选个角度
     
     def _update(self):
-        for i in self.candidate_red:
-            print(f'当前的候选红A的name为：{i.name}')
-        if len(self.candidate_red) == 1:
-            self.angle_velocity = self.angle_to_target(self.candidate_red[0])-self.angle
-        elif len(self.candidate_red) > 1:
-            min_dist = None
-            min_dist_agent = None
+        if self.find_true_flag == 1:
+            print(f"找到了真实的RedA:{self.real_redA_by_find_flag.name},不再进行候选集红A比较")
+            self.angle_velocity = self.angle_to_target(self.real_redA_by_find_flag)-self.angle
+        else:
             for i in self.candidate_red:
-                if not min_dist_agent:
-                    min_dist = self.distance(i)
-                    min_dist_agent = i
-                if self.distance(i) < min_dist:
-                    min_dist = self.distance(i)
-                    min_dist_agent = i
-            self.angle_velocity = self.angle_to_target(min_dist_agent)-self.angle
-            print(f'更近的一个智能体为:{min_dist_agent.name}')
+                print(f'当前的候选红A的name为：{i.name}')
+            if len(self.candidate_red) == 1:
+                self.angle_velocity = self.angle_to_target(self.candidate_red[0])-self.angle
+            elif len(self.candidate_red) > 1:
+                min_dist = None
+                min_dist_agent = None
+                for i in self.candidate_red:
+                    if not min_dist_agent:
+                        min_dist = self.distance(i)
+                        min_dist_agent = i
+                    if self.distance(i) < min_dist:
+                        min_dist = self.distance(i)
+                        min_dist_agent = i
+                self.angle_velocity = self.angle_to_target(min_dist_agent)-self.angle
+                print(f'更近的一个智能体为:{min_dist_agent.name}')
         self.update()
         
     
@@ -178,6 +185,10 @@ class RedA(Entity):
         self.position = np.array([0,0])
         self.velocity = segment_to_km_per_second(6)
         self.angle = math.pi/2
+    
+    def _update(self,act):
+        self._perform_action(act)
+        self.update()
 
 
 class RedB1(Entity):
@@ -230,6 +241,8 @@ class ShipEnv(gym.Env):
         self.redB2.reset()
         self.blueA.reset()
 
+        self.done = False
+
 
     def red_in_explore_region(self):
         for i in [self.redA,self.redB1]:
@@ -240,11 +253,13 @@ class ShipEnv(gym.Env):
             if dist_i < self.blueA.confirm_explore_size:
                 if type(i) == RedA:
                     self.blueA.find_true_flag = 1
+                    self.blueA.real_redA_by_find_flag = i
                 else:
                     self.blueA.candidate_list.remove(i)
                     self.blueA.black_list.append(i)
             if dist_i < self.blueA.boom_size:
                 self.done = True
+                print(f'引爆红A')
 
     def step(self):
         self.red_in_explore_region()
@@ -327,13 +342,17 @@ def on_draw():
     #     print(i.position)
 
 i = 0
+env.reset()
 def update(dt):
     global i
     if i < 488:
         env.step()
         if env.done:
-            pyglet.app.exit()
+            env.reset()
         i += 1
+    else:
+        i=0
+        env.reset()
 
 pyglet.clock.schedule_interval(update, 0.1)
 
