@@ -2,10 +2,25 @@
  * @Author: gongweijing 876887913@qq.com
  * @Date: 2023-12-04 13:33:29
  * @LastEditors: gongweijing 876887913@qq.com
- * @LastEditTime: 2023-12-08 00:25:19
+ * @LastEditTime: 2023-12-09 11:56:17
  * @FilePath: /gongweijing/Ship_New/readme.md
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
+# maddpg的基本依赖方法
+## env.action_space
+[Discrete(3), Discrete(5)]
+## env.observation_space
+[Box(-inf, inf, (3,), float32), Box(-inf, inf, (11,), float32)]
+## list(obs.values()), list(reward.values()), list(done.values()), list(info.values())
+([array([0.15, 0.65, 0.15], dtype=float32), array([ 0.        ,  0.        ,  0.2631022 ,  0.35862896, -0.06338122,-0.11295114,  0.35266367, -0.16499558,  1.        ,  0.        ,0.        ]dtype=float32)]
+
+[-0.01677513865695685, -0.01677513865695685], 
+
+[False, False], 
+
+[{}, {}]
+)
+
 # Linux下进行项目部署
 ```
 pip install -r requirements.txt
