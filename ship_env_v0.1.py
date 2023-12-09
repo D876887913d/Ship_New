@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-08 09:03:18
+LastEditTime: 2023-12-08 18:14:05
 FilePath: /gongweijing/Ship_New/ship_env_v0.1.py
 Description: 
 
@@ -128,6 +128,8 @@ class BlueA(Entity):
         self.accel_max = 0
         self.speed_max = segment_to_km_per_second(40)
         self.explore_size = 1
+        self.init_explore_size = 1
+
         self.confirm_explore_size = 0.1
         self.boom_size = 0.02
         # 最大航程为10km，转化为km/s之后，最大的可以行驶的时间步为485个。
@@ -144,7 +146,7 @@ class BlueA(Entity):
     def reset(self):        
         self.position = np.array([0,random.uniform(self.explore_size/3,2*self.explore_size/3)])
         self.velocity = segment_to_km_per_second(40)
-        self.angle = - math.pi/2 # 随便选个角度
+        self.angle = random.uniform(self.bound_angle[0],self.bound_angle[1])
     
     def _update(self):
         if self.find_true_flag == 1:
@@ -179,6 +181,7 @@ class RedA(Entity):
         self.color = (255, 100, 100)
         self.accel_max = 0.02 * 10**(-3)
         self.speed_max = segment_to_km_per_second(30)
+        self.init_explore_size = 4.5
         self.explore_size = 4.5
 
     def reset(self):
@@ -186,6 +189,10 @@ class RedA(Entity):
         self.velocity = segment_to_km_per_second(6)
         self.angle = math.pi/2
     
+    def _perform_action(self,act):
+        self.accel = act[0]
+        self.angle_velocity = act[1]
+
     def _update(self,act):
         self._perform_action(act)
         self.update()
@@ -199,12 +206,21 @@ class RedB1(Entity):
         # 加速度为:0.02m/s^2
         self.accel_max = 0.02 * 10**(-3)
         self.speed_max = segment_to_km_per_second(15)
+        self.init_explore_size = 2
         self.explore_size = 2
 
     def reset(self):
         self.position = np.array([random.uniform(0.5,1),0])
         self.velocity = segment_to_km_per_second(6)
         self.angle =  math.pi/2
+    
+    def _perform_action(self,act):
+        self.accel = act[0]
+        self.angle_velocity = act[1]
+
+    def _update(self,act):
+        self._perform_action(act)
+        self.update()
 
 class RedB2(Entity):
     def __init__(self):
@@ -214,11 +230,30 @@ class RedB2(Entity):
         self.accel_max = 0.02 * 10**(-3)
         self.speed_max = segment_to_km_per_second(15)
         self.explore_size = 2
+        self.init_explore_size = 2
+
+        self.interfering_truncation_distance = 0.8
 
     def reset(self):
         self.position = np.array([-random.uniform(0.8,1.2),0])
         self.velocity = segment_to_km_per_second(6)
         self.angle =  math.pi/2
+
+    def make_interference(self,entity):
+        if self.distance(entity) < self.interfering_truncation_distance * self.interfering_percent:
+            self.entity.explore_size = self.entity.init_explore_size * (1 - 1./self.distance(entity))
+        else:
+            self.entity.explore_size = self.entity.init_explore_size
+    
+    def _perform_action(self,act):
+        self.accel = act[0]
+        self.angle_velocity = act[1]
+        self.interfering_percent = act[2]
+
+    def _update(self,act):
+        self._perform_action(act)
+        self.update()
+
 
 class ShipEnv(gym.Env):
     def __init__(self):
