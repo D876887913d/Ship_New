@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-09 16:05:29
+LastEditTime: 2023-12-09 18:47:18
 FilePath: /gongweijing/Ship_New/ship_env_v0.1.py
 Description: 
 
@@ -50,6 +50,14 @@ class Entity:
         self.bound_angle_velocity = np.array([-math.pi/2., math.pi/2.])
         # 角度边界限制，防止一直向某个方向变化达到无穷大
         self.bound_angle = np.array([-math.pi, math.pi])
+    
+    def get_observation(self):
+        return np.array([
+                self.position[0],
+                self.position[1],
+                self.velocity, 
+                self.angle, 
+            ])
         
 
     def update(self):
@@ -117,6 +125,9 @@ class Entity:
         else:
             to_angle = -to_angle
         return to_angle
+    
+    # def get_action_space(self):
+    #     return spaces.Box(PARAMETERS_MIN[i], PARAMETERS_MAX[i], dtype=np.float32)
 
 
 
@@ -140,8 +151,6 @@ class BlueA(Entity):
         self.find_true_flag = 0
         self.real_redA_by_find_flag =None
         self.black_list = []
-
-        
 
     def reset(self):        
         self.position = np.array([0,random.uniform(self.explore_size/3,2*self.explore_size/3)])
@@ -231,8 +240,18 @@ class RedB2(Entity):
         self.speed_max = segment_to_km_per_second(15)
         self.explore_size = 2
         self.init_explore_size = 2
+        self.interfering_percent = 0.5
 
         self.interfering_truncation_distance = 0.8
+
+    def get_observation(self):
+        return np.array([
+                self.position[0],              
+                self.position[1],              
+                self.velocity,                 
+                self.angle,                    
+                self.interfering_percent       
+            ])
 
     def reset(self):
         self.position = np.array([-random.uniform(0.8,1.2),0])
@@ -270,8 +289,16 @@ class ShipEnv(gym.Env):
         self.state = []
         self.observation = None
 
-    def reset(self):
+        self.action_space = spaces.Tuple(
+            
+            )
+        self.observation_space = spaces.Tuple((
+            # spaces.Box(low=0., high=1., shape=self.get_state().shape, dtype=np.float32),  # scaled states
+            spaces.Box(low=LOW_VECTOR, high=HIGH_VECTOR, dtype=np.float32),  # unscaled states
+            spaces.Discrete(200),  # internal time steps (200 limit is an estimate)
+        ))
 
+    def reset(self):
         # 假设三个红色智能体初始方向向上走，蓝色智能体在其前方explore_scopeB/3~2*explore_scopeB/3之间的范围
         # 且运动的方向为向下。
         self.redA.reset()
@@ -279,34 +306,17 @@ class ShipEnv(gym.Env):
         self.redB2.reset()
         self.blueA.reset()
         self.done = False
+        return self.get_overall_observation()
 
-        self.observation = (
-            np.array([
-                self.redA.position[0],  # 第一个红色物体A的横坐标
-                self.redA.position[1],  # 第一个红色物体A的纵坐标
-                self.redA.velocity,     # 第一个红色物体A的速度
-                self.redA.angle         # 第一个红色物体A的角度
-            ]),
-            np.array([
-                self.redB1.position[0],  # 第二个红色物体B1的横坐标
-                self.redB1.position[1],  # 第二个红色物体B1的纵坐标
-                self.redB1.velocity,     # 第二个红色物体B1的速度
-                self.redB1.angle         # 第二个红色物体B1的角度
-            ]),
-            np.array([
-                self.redB2.position[0],     # 第三个红色物体B2的横坐标
-                self.redB2.position[1],     # 第三个红色物体B2的纵坐标
-                self.redB2.velocity,        # 第三个红色物体B2的速度
-                self.redB2.angle,           # 第三个红色物体B2的角度
-                self.redB2.干扰比例        # 第三个红色物体B2的干扰比例
-            ]),  # 在这里添加逗号
-            np.array([
-                self.blueA.position[0],
-                self.blueA.position[1],
-                self.blueA.velocity, 
-                self.blueA.angle, 
-            ])
+
+    def get_overall_observation(self):
+        observation = np.concatenate([
+            self.redA.get_observation(),
+            self.redB1.get_observation(),
+            self.redB2.get_observation(),
+            self.blueA.get_observation()]
         )
+        return observation
 
 
     def red_in_explore_region(self):
@@ -405,13 +415,16 @@ def on_draw():
     entity_draw_body()
 
 i = 0
-env.reset()
+init_state= env.reset()
+print(init_state)
 def update(dt):
     global i
     if i < 488:
         env.step()
+        print(env.get_overall_observation())
         if env.done:
-            env.reset()
+            init_state = env.reset()
+            print(init_state)
         i += 1
     else:
         i=0
