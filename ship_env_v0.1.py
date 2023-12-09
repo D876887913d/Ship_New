@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-08 18:14:05
+LastEditTime: 2023-12-09 16:05:29
 FilePath: /gongweijing/Ship_New/ship_env_v0.1.py
 Description: 
 
@@ -262,21 +262,51 @@ class ShipEnv(gym.Env):
         self.redB2 = None
         self.blueA = None
         self.done = False
-        self.reset()
-
-    def reset(self):
         self.redA  = RedA()
         self.redB1 = RedB1()
         self.redB2 = RedB2()
         self.blueA = BlueA()
+
+        self.state = []
+        self.observation = None
+
+    def reset(self):
+
         # 假设三个红色智能体初始方向向上走，蓝色智能体在其前方explore_scopeB/3~2*explore_scopeB/3之间的范围
         # 且运动的方向为向下。
         self.redA.reset()
         self.redB1.reset()
         self.redB2.reset()
         self.blueA.reset()
-
         self.done = False
+
+        self.observation = (
+            np.array([
+                self.redA.position[0],  # 第一个红色物体A的横坐标
+                self.redA.position[1],  # 第一个红色物体A的纵坐标
+                self.redA.velocity,     # 第一个红色物体A的速度
+                self.redA.angle         # 第一个红色物体A的角度
+            ]),
+            np.array([
+                self.redB1.position[0],  # 第二个红色物体B1的横坐标
+                self.redB1.position[1],  # 第二个红色物体B1的纵坐标
+                self.redB1.velocity,     # 第二个红色物体B1的速度
+                self.redB1.angle         # 第二个红色物体B1的角度
+            ]),
+            np.array([
+                self.redB2.position[0],     # 第三个红色物体B2的横坐标
+                self.redB2.position[1],     # 第三个红色物体B2的纵坐标
+                self.redB2.velocity,        # 第三个红色物体B2的速度
+                self.redB2.angle,           # 第三个红色物体B2的角度
+                self.redB2.干扰比例        # 第三个红色物体B2的干扰比例
+            ]),  # 在这里添加逗号
+            np.array([
+                self.blueA.position[0],
+                self.blueA.position[1],
+                self.blueA.velocity, 
+                self.blueA.angle, 
+            ])
+        )
 
 
     def red_in_explore_region(self):
@@ -373,8 +403,6 @@ def on_draw():
     entity_draw_comment(env.blueA,16*3)
 
     entity_draw_body()
-    # for i in entity_list:
-    #     print(i.position)
 
 i = 0
 env.reset()
