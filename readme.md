@@ -2,7 +2,7 @@
  * @Author: gongweijing 876887913@qq.com
  * @Date: 2023-12-04 13:33:29
  * @LastEditors: gongweijing 876887913@qq.com
- * @LastEditTime: 2023-12-09 11:56:17
+ * @LastEditTime: 2023-12-10 10:40:54
  * @FilePath: /gongweijing/Ship_New/readme.md
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -104,6 +104,16 @@ python3 shipenv_add_rb.py
 
 $$angle_B = angle_B + acos(BA)-angle_B$$
 
+## 奖励
+### 红色A智能体
+红A与蓝A的距离越远，那么红A越容易取得胜利，所以奖励函数与距离的数值成正比，可以直接设定为distance。
+### 红色B1智能体
+红B1的作用是进行诱骗，所以除了与红A之间的距离成正比之外，按理来说还需要其更接近蓝A，所以可以采用类似于加权的形式进行相应的求解:
+$$reward = distance(RedA,BlueA) - 0.5 * distance(RedB1,BlueA)$$
+### 红色B2智能体
+红B2的作用是进行干扰，所以除了与红A之间的距离成正比之外，按理来说还需要其更大程度的减少蓝A的探测范围，所以可以采用类似于加权的形式进行相应的求解:
+$$reward=distance(RedA,BlueA) + 0.5*(BlueA.explore\_size - BlueA.init\_explore\_size)$$
+
 ## 老师的思路
 先获取一个候选的redA_access的list或者是dict，对应的数据类型应当为entity，要添加的方法还包括获取与其他entity的距离。
 
@@ -144,8 +154,4 @@ if 距离小于20m && find_true_flag == 1：
 if dict[真实红A]不存在，dict[候选红A*]不存在或已经排除嫌疑，dict[红B2b_1*]存在：
 得到红B2_1的初始状态，假设这个转态即为红A的初始状态，假设红A（-90或90转向），得到其目标的方位：
 找到当前距离最近的红b*，存到目标方位
-当前时间步，向目标方位全速（最大加速度）移动
-
-
-
 当前时间步，向目标方位全速（最大加速度）移动

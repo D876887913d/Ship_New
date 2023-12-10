@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-09 18:47:18
+LastEditTime: 2023-12-10 13:09:08
 FilePath: /gongweijing/Ship_New/ship_env_v0.1.py
 Description: 
 
@@ -126,9 +126,17 @@ class Entity:
             to_angle = -to_angle
         return to_angle
     
-    # def get_action_space(self):
-    #     return spaces.Box(PARAMETERS_MIN[i], PARAMETERS_MAX[i], dtype=np.float32)
-
+    def get_action_space(self):
+        # 动作空间基本的智能体包括两个：1.加速度；2.角速度
+        low = np.array([0,-self.bound_angle_velocity[0]])
+        high = np.array([self.accel_max,self.bound_angle_velocity[1]])
+        return spaces.Box(low,high, dtype=np.float64)
+    
+    def get_observation_space(self):
+        # 观测空间基本的智能体包括四个：1.x坐标；2.y坐标；3.速度；4.角度
+        low = np.array([-10,-10,0,self.bound_angle[0],])
+        high = np.array([10,10,self.speed_max,self.bound_angle[1],])
+        return spaces.Box(low = low, high = high, dtype=np.float64)
 
 
 class BlueA(Entity):
@@ -159,11 +167,11 @@ class BlueA(Entity):
     
     def _update(self):
         if self.find_true_flag == 1:
-            print(f"找到了真实的RedA:{self.real_redA_by_find_flag.name},不再进行候选集红A比较")
+            # print(f"找到了真实的RedA:{self.real_redA_by_find_flag.name},不再进行候选集红A比较")
             self.angle_velocity = self.angle_to_target(self.real_redA_by_find_flag)-self.angle
         else:
-            for i in self.candidate_red:
-                print(f'当前的候选红A的name为：{i.name}')
+            # for i in self.candidate_red:
+                # print(f'当前的候选红A的name为：{i.name}')
             if len(self.candidate_red) == 1:
                 self.angle_velocity = self.angle_to_target(self.candidate_red[0])-self.angle
             elif len(self.candidate_red) > 1:
@@ -177,7 +185,7 @@ class BlueA(Entity):
                         min_dist = self.distance(i)
                         min_dist_agent = i
                 self.angle_velocity = self.angle_to_target(min_dist_agent)-self.angle
-                print(f'更近的一个智能体为:{min_dist_agent.name}')
+                # print(f'更近的一个智能体为:{min_dist_agent.name}')
         self.update()
         
     
@@ -242,7 +250,7 @@ class RedB2(Entity):
         self.init_explore_size = 2
         self.interfering_percent = 0.5
 
-        self.interfering_truncation_distance = 0.8
+        self.interfering_truncation_distance = 0.8    
 
     def get_observation(self):
         return np.array([
@@ -272,6 +280,17 @@ class RedB2(Entity):
     def _update(self,act):
         self._perform_action(act)
         self.update()
+            
+    def get_observation_space(self):
+        # 观测空间：1.x坐标；2.y坐标；3.速度；4.角度 5.干扰范围的比例
+        low = np.array([-10,-10,0,self.bound_angle[0],0])
+        high = np.array([10,10,self.speed_max,self.bound_angle[1],1])
+        return spaces.Box(low = low, high = high, dtype=np.float64)
+
+    def get_action_space(self):
+        low = np.array([0,-self.bound_angle_velocity[0],0])
+        high = np.array([self.accel_max,self.bound_angle_velocity[1],1])
+        return spaces.Box(low,high, dtype=np.float64)
 
 
 class ShipEnv(gym.Env):
@@ -281,6 +300,9 @@ class ShipEnv(gym.Env):
         self.redB2 = None
         self.blueA = None
         self.done = False
+
+        self.num_agents = 3
+
         self.redA  = RedA()
         self.redB1 = RedB1()
         self.redB2 = RedB2()
@@ -290,13 +312,15 @@ class ShipEnv(gym.Env):
         self.observation = None
 
         self.action_space = spaces.Tuple(
-            
+            (self.redA.get_action_space(),
+            self.redB1.get_action_space(),
+            self.redB2.get_action_space(),)
             )
-        self.observation_space = spaces.Tuple((
-            # spaces.Box(low=0., high=1., shape=self.get_state().shape, dtype=np.float32),  # scaled states
-            spaces.Box(low=LOW_VECTOR, high=HIGH_VECTOR, dtype=np.float32),  # unscaled states
-            spaces.Discrete(200),  # internal time steps (200 limit is an estimate)
-        ))
+        self.observation_space = spaces.Tuple(
+            (self.redA.get_observation_space(),
+            self.redB1.get_observation_space(),
+            self.redB2.get_observation_space(),)
+        )
 
     def reset(self):
         # 假设三个红色智能体初始方向向上走，蓝色智能体在其前方explore_scopeB/3~2*explore_scopeB/3之间的范围
@@ -334,11 +358,32 @@ class ShipEnv(gym.Env):
                     self.blueA.black_list.append(i)
             if dist_i < self.blueA.boom_size:
                 self.done = True
-                print(f'引爆红A')
+                # print(f'引爆红A')
 
-    def step(self):
+    def get_base_reward(self):
+        dist_blueA_with_redA = self.redA.distance(BlueA)
+        dist_blueA_with_redB1 = self.redB1.distance(BlueA)
+        delta_explore_size = self.blueA.explore_size - \
+                                self.blueA.init_explore_size
+        reward_redA = dist_blueA_with_redA
+        reward_redB1 = dist_blueA_with_redA + 0.5 * dist_blueA_with_redB1
+        reward_redB2 = dist_blueA_with_redA + 0.5 * delta_explore_size
+        return [reward_redA,reward_redB1,reward_redB2]
+
+    def step(self,act):
         self.red_in_explore_region()
         self.blueA._update()
+
+        self.redA._update(act[0])
+        self.redB1._update(act[1])
+        self.redB2._update(act[2])
+
+        obs = self.get_overall_observation()
+        reward = self.get_base_reward()
+        done = [self.done for i in range(self.num_agents)]
+        
+        return obs,reward,done
+    
             
 
 DRAW_SCALE = 40
@@ -415,16 +460,18 @@ def on_draw():
     entity_draw_body()
 
 i = 0
-init_state= env.reset()
+init_state = env.reset()
 print(init_state)
+print(env.action_space)
+print(env.observation_space)
 def update(dt):
     global i
     if i < 488:
         env.step()
-        print(env.get_overall_observation())
+        # print(env.get_overall_observation())        
         if env.done:
             init_state = env.reset()
-            print(init_state)
+            # print(init_state)
         i += 1
     else:
         i=0

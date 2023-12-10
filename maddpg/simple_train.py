@@ -32,7 +32,9 @@ def run_evaluate_episodes(env, agents, eval_episodes):
             action_n = [
                 agent.predict(obs) for agent, obs in zip(agents, obs_n)
             ]
+            
             obs_n, reward_n, done_n, _ = env.step(action_n)
+            
             done = all(done_n)
             total_reward += sum(reward_n)
             # show animation
@@ -54,7 +56,10 @@ def run_episode(env, agents):
     while not done and steps < MAX_STEP_PER_EPISODE:
         steps += 1
         action_n = [agent.sample(obs) for agent, obs in zip(agents, obs_n)]
+        
+        print("各个智能体的总动作输入为：",action_n)
         next_obs_n, reward_n, done_n, _ = env.step(action_n)
+        print("各个智能体的总状态输入为：",next_obs_n)
         done = all(done_n)
 
         # store experience
