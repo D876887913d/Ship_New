@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-11 18:22:48
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-11 18:45:23
+LastEditTime: 2023-12-11 19:27:30
 FilePath: /gongweijing/Ship_New/ship_agent_train.py
 Description: 
 
@@ -40,6 +40,7 @@ def run_evaluate_episodes(env, agents, eval_episodes):
         steps = 0
         while not done and steps < MAX_STEP_PER_EPISODE:
             steps += 1
+            # action_n的每个数值都在[-1,1]的区间，需要对于deploy环境进行一定的适配。
             action_n = [
                 agent.predict(obs) for agent, obs in zip(agents, obs_n)
             ]
@@ -48,10 +49,6 @@ def run_evaluate_episodes(env, agents, eval_episodes):
             
             done = all(done_n)
             total_reward += sum(reward_n)
-            # show animation
-            if args.show:
-                time.sleep(0.1)
-                env.render()
 
         eval_episode_rewards.append(total_reward)
         eval_episode_steps.append(steps)
@@ -71,7 +68,6 @@ def run_episode(env, agents):
         next_obs_n, reward_n, done_n, _ = env.step(action_n)
         done = all(done_n)
 
-        # store experience
         for i, agent in enumerate(agents):
             agent.add_experience(obs_n[i], action_n[i], reward_n[i],next_obs_n[i], done_n[i])
 
@@ -80,10 +76,6 @@ def run_episode(env, agents):
         for i, reward in enumerate(reward_n):
             total_reward += reward
             agents_reward[i] += reward
-
-        # show model effect without training
-        if args.restore and args.show:
-            continue
 
         # learn policy
         for i, agent in enumerate(agents):
