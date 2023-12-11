@@ -2,8 +2,8 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-11 18:23:34
-FilePath: /gongweijing/Ship_New/ship_env_v0.1.py
+LastEditTime: 2023-12-11 18:32:56
+FilePath: /gongweijing/Ship_New/ship_env_deploy.py
 Description: 
 
 Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
@@ -325,6 +325,8 @@ class ShipEnv(gym.Env):
         self.done = False
 
         self.num_agents = 3
+        self.obs_shape_n = [6,6,7]
+        self.act_shape_n = [2,2,3]
 
         self.redA  = RedA()
         self.redB1 = RedB1()
@@ -366,7 +368,7 @@ class ShipEnv(gym.Env):
             self.redA.get_observation(),
             self.redB1.get_observation(),
             self.redB2.get_observation(),
-            self.blueA.get_observation()]
+            ]
         
         return observation
 
@@ -433,6 +435,6 @@ class ShipEnv(gym.Env):
         
         return obs,reward,done
     
-# env = ShipEnv()
-# init_obs = env.reset()
-# print(env.step_max,init_obs,env.observation_space)
+env = ShipEnv()
+init_obs = env.reset()
+print(env.step_max,init_obs,env.observation_space,env.action_space)

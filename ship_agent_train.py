@@ -1,22 +1,33 @@
+'''
+Author: gongweijing 876887913@qq.com
+Date: 2023-12-11 18:22:48
+LastEditors: gongweijing 876887913@qq.com
+LastEditTime: 2023-12-11 18:45:23
+FilePath: /gongweijing/Ship_New/ship_agent_train.py
+Description: 
+
+Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
+'''
 
 import os
 import time
 import argparse
 import numpy as np
-from simple_model import MAModel
-from simple_agent import MAAgent
+from maddpg.simple_model import MAModel
+from maddpg.simple_agent import MAAgent
 from maddpg import MADDPG
-from Env import MAenv
 from gym import spaces
+from ship_env_deploy import *
 
 CRITIC_LR = 0.01  # learning rate for the critic model
 ACTOR_LR = 0.01  # learning rate of the actor model
 GAMMA = 0.95  # reward discount factor
 TAU = 0.01  # soft update
 BATCH_SIZE = 1024
-MAX_STEP_PER_EPISODE = 25  # maximum step per episode
+MAX_STEP_PER_EPISODE = 485  # maximum step per episode
 EVAL_EPISODES = 3
 
+AGENT_DICT = {0:'RedA',1:'RedB1',2:'RedB2'}
 
 # Runs policy and returns episodes' rewards and steps for evaluation
 def run_evaluate_episodes(env, agents, eval_episodes):
@@ -57,9 +68,7 @@ def run_episode(env, agents):
         steps += 1
         action_n = [agent.sample(obs) for agent, obs in zip(agents, obs_n)]
         
-        # print("各个智能体的总动作输入为：",action_n)
         next_obs_n, reward_n, done_n, _ = env.step(action_n)
-        # print("各个智能体的总状态输入为：",next_obs_n)
         done = all(done_n)
 
         # store experience
@@ -88,18 +97,16 @@ def main():
     from datetime import datetime
 
     now = datetime.now()
-    logdir = './logdir/' + now.strftime('%Y%m%d-%H%M%S')
+    logdir = './maddpg/logdir/' + now.strftime('%Y%m%d-%H%M%S')
     writer = SummaryWriter(logdir)
 
-    env = MAenv(args.env, args.continuous_actions)
-    if args.continuous_actions:
-        assert isinstance(env.action_space[0], spaces.Box)
+    env = ShipEnv()
 
     critic_in_dim = sum(env.obs_shape_n) + sum(env.act_shape_n)
 
     # build agents
     agents = []
-    for i in range(env.n):
+    for i in range(env.num_agents):
         model = MAModel(env.obs_shape_n[i], env.act_shape_n[i], critic_in_dim,
                         args.continuous_actions)
         algorithm = MADDPG(
@@ -121,7 +128,7 @@ def main():
     if args.restore:
         # restore modle
         for i in range(len(agents)):
-            model_file = args.model_dir + '/agent_' + str(i)
+            model_file = args.model_dir + f'/{AGENT_DICT[i]}'
             if not os.path.exists(model_file):
                 raise Exception(
                     'model file {} does not exits'.format(model_file))
@@ -157,7 +164,7 @@ def main():
                 model_dir = args.model_dir
                 os.makedirs(os.path.dirname(model_dir), exist_ok=True)
                 for i in range(len(agents)):
-                    model_name = '/agent_' + str(i)
+                    model_name = f'/{AGENT_DICT[i]}'
                     agents[i].save(model_dir + model_name)
 
 
@@ -180,12 +187,12 @@ if __name__ == '__main__':
     parser.add_argument(
         '--model_dir',
         type=str,
-        default='./model',
+        default='./maddpg/model',
         help='directory for saving model')
     parser.add_argument(
         '--continuous_actions',
         action='store_true',
-        default=False,
+        default=True,
         help='use continuous action mode or not')
     parser.add_argument(
         '--max_episodes',
