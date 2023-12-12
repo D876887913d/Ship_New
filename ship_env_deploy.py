@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-11 23:13:11
+LastEditTime: 2023-12-12 23:33:32
 FilePath: /gongweijing/Ship_New/ship_env_deploy.py
 Description: 
 
@@ -420,7 +420,7 @@ class ShipEnv(gym.Env):
         self.red_in_explore_region()
         self.blue_in_explore_region()
         act[0] = [act[0][0]*self.redA.accel_max, act[0][1]*self.redA.bound_angle_velocity[1]]
-        act[1] = [act[1][0]*self.redB1.accel_max,act[0][1]*self.redB1.bound_angle_velocity[1]]
+        act[1] = [act[1][0]*self.redB1.accel_max,act[1][1]*self.redB1.bound_angle_velocity[1]]
         act[2] = [act[2][0]*self.redB2.accel_max,act[2][1]*self.redB2.bound_angle_velocity[1],
                   (act[2][2]+1)/2] 
 

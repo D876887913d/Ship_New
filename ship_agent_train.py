@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-11 18:22:48
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-12 11:11:30
+LastEditTime: 2023-12-12 14:38:01
 FilePath: /gongweijing/Ship_New/ship_agent_train.py
 Description: 
 
@@ -101,7 +101,7 @@ def main():
     for i in range(env.num_agents):
         model = MAModel(env.obs_shape_n[i], env.act_shape_n[i], critic_in_dim,args.continuous_actions)
         algorithm = MADDPG(
-            model,
+            model = model,
             agent_index=i,
             act_space=env.action_space,
             gamma=GAMMA,
