@@ -1,3 +1,11 @@
+'''
+Author: gongweijing 876887913@qq.com
+Date: 2023-12-08 22:28:45
+LastEditors: gongweijing 876887913@qq.com
+LastEditTime: 2023-12-11 22:11:03
+FilePath: /root/Ship_New/maddpg/core/__init__.py
+Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+'''
 #   Copyright (c) 2018 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +20,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from core.agent_base import *
-from core.model_base import *
-from core.algorithm_base import *
+from maddpg.core.agent_base import *
+from maddpg.core.model_base import *
+from maddpg.core.algorithm_base import *

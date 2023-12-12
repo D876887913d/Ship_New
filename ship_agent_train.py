@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-11 18:22:48
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-11 19:27:30
+LastEditTime: 2023-12-12 00:02:29
 FilePath: /gongweijing/Ship_New/ship_agent_train.py
 Description: 
 
@@ -15,7 +15,7 @@ import argparse
 import numpy as np
 from maddpg.simple_model import MAModel
 from maddpg.simple_agent import MAAgent
-from maddpg import MADDPG
+from maddpg.maddpg import MADDPG
 from gym import spaces
 from ship_env_deploy import *
 
@@ -43,9 +43,9 @@ def run_evaluate_episodes(env, agents, eval_episodes):
             # action_n的每个数值都在[-1,1]的区间，需要对于deploy环境进行一定的适配。
             action_n = [
                 agent.predict(obs) for agent, obs in zip(agents, obs_n)
-            ]
+            ]            
             
-            obs_n, reward_n, done_n, _ = env.step(action_n)
+            obs_n, reward_n, done_n = env.step(action_n)
             
             done = all(done_n)
             total_reward += sum(reward_n)
@@ -59,13 +59,13 @@ def run_episode(env, agents):
     obs_n = env.reset()
     done = False
     total_reward = 0
-    agents_reward = [0 for _ in range(env.n)]
+    agents_reward = [0 for _ in range(env.num_agents)]
     steps = 0
     while not done and steps < MAX_STEP_PER_EPISODE:
         steps += 1
         action_n = [agent.sample(obs) for agent, obs in zip(agents, obs_n)]
         
-        next_obs_n, reward_n, done_n, _ = env.step(action_n)
+        next_obs_n, reward_n, done_n = env.step(action_n)
         done = all(done_n)
 
         for i, agent in enumerate(agents):
@@ -143,7 +143,6 @@ def main():
 
         # evaluste agents
         if total_episodes % args.test_every_episodes == 0:
-
             eval_episode_rewards, eval_episode_steps = run_evaluate_episodes(
                 env, agents, EVAL_EPISODES)
             

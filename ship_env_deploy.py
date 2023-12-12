@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-11 18:32:56
+LastEditTime: 2023-12-11 23:13:11
 FilePath: /gongweijing/Ship_New/ship_env_deploy.py
 Description: 
 
@@ -69,6 +69,7 @@ class Entity:
 
     def update(self):
         """ Update the position and velocity. """
+        self.position = self.position.astype(float)
         self.position += self.moving()
         self.velocity += self.accel
         self.angle    += self.angle_velocity
@@ -340,12 +341,12 @@ class ShipEnv(gym.Env):
         self.state = []
         self.observation = None
 
-        self.action_space = spaces.Tuple(
+        self.action_space = list(
             (self.redA.get_action_space(),
             self.redB1.get_action_space(),
             self.redB2.get_action_space(),)
             )
-        self.observation_space = spaces.Tuple(
+        self.observation_space = list(
             (self.redA.get_observation_space(),
             self.redB1.get_observation_space(),
             self.redB2.get_observation_space(),)
@@ -406,8 +407,8 @@ class ShipEnv(gym.Env):
                 # print(f'引爆红A')
 
     def get_base_reward(self):
-        dist_blueA_with_redA = self.redA.distance(BlueA)
-        dist_blueA_with_redB1 = self.redB1.distance(BlueA)
+        dist_blueA_with_redA = self.redA.distance(self.blueA)
+        dist_blueA_with_redB1 = self.redB1.distance(self.blueA)
         delta_explore_size = self.blueA.explore_size - \
                                 self.blueA.init_explore_size
         reward_redA = dist_blueA_with_redA
@@ -418,6 +419,10 @@ class ShipEnv(gym.Env):
     def step(self,act):
         self.red_in_explore_region()
         self.blue_in_explore_region()
+        act[0] = [act[0][0]*self.redA.accel_max, act[0][1]*self.redA.bound_angle_velocity[1]]
+        act[1] = [act[1][0]*self.redB1.accel_max,act[0][1]*self.redB1.bound_angle_velocity[1]]
+        act[2] = [act[2][0]*self.redB2.accel_max,act[2][1]*self.redB2.bound_angle_velocity[1],
+                  (act[2][2]+1)/2] 
 
         self.blueA._update()
         self.redA._update(act[0])
@@ -435,6 +440,6 @@ class ShipEnv(gym.Env):
         
         return obs,reward,done
     
-env = ShipEnv()
-init_obs = env.reset()
-print(env.step_max,init_obs,env.observation_space,env.action_space)
+# env = ShipEnv()
+# init_obs = env.reset()
+# print(env.step_max,init_obs,env.observation_space,env.action_space)

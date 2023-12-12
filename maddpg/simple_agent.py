@@ -1,7 +1,7 @@
 import torch
 import numpy as np
-from replay import ReplayMemory
-from core.torch.agent import Agent
+from maddpg.replay import ReplayMemory
+from maddpg.core.torch.agent import Agent
 
 class MAAgent(Agent):
     def __init__(self,
@@ -25,7 +25,7 @@ class MAAgent(Agent):
         self.global_train_step = 0
 
         super(MAAgent, self).__init__(algorithm)
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # # Attention: In the beginning, sync target model totally.
         self.alg.sync_target(decay=0)
 
@@ -41,7 +41,6 @@ class MAAgent(Agent):
         """ sample action by model or target_model
         """
         obs = torch.from_numpy(obs.reshape(1, -1)).float()
-        obs=obs.to(self.device)
         act = self.alg.sample(obs, use_target_model=use_target_model)
         act_numpy = act.detach().cpu().numpy().flatten()
         return act_numpy

@@ -1,3 +1,11 @@
+'''
+Author: gongweijing 876887913@qq.com
+Date: 2023-12-08 22:28:46
+LastEditors: gongweijing 876887913@qq.com
+LastEditTime: 2023-12-11 22:12:06
+FilePath: /root/Ship_New/maddpg/core/torch/algorithm.py
+Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+'''
 #   Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +23,8 @@
 import warnings
 warnings.simplefilter('default')
 
-from core.algorithm_base import AlgorithmBase
-from core.torch.model import Model
+from maddpg.core.algorithm_base import AlgorithmBase
+from maddpg.core.torch.model import Model
 
 __all__ = ['Algorithm']
 

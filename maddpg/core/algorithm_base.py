@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from core.model_base import ModelBase
+from maddpg.core.model_base import ModelBase
 
 
 class AlgorithmBase(object):

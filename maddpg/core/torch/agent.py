@@ -18,8 +18,8 @@ warnings.simplefilter('default')
 import os
 import torch
 
-from core.agent_base import AgentBase
-from core.torch.algorithm import Algorithm
+from maddpg.core.agent_base import AgentBase
+from maddpg.core.torch.algorithm import Algorithm
 # from parl.utils import machine_info
 
 __all__ = ['Agent']

@@ -15,7 +15,7 @@
 import torch
 import torch.nn as nn
 
-from core.model_base import ModelBase
+from maddpg.core.model_base import ModelBase
 # from parl.utils import machine_info
 
 __all__ = ['Model']

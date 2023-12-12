@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from copy import deepcopy
-from core.torch.algorithm import Algorithm
+from maddpg.core.torch.algorithm import Algorithm
 
 class MADDPG(Algorithm):
     def __init__(self,
@@ -45,8 +45,7 @@ class MADDPG(Algorithm):
         self.actor_lr = actor_lr
         self.critic_lr = critic_lr
 
-        self.device = torch.device("cuda" if torch.cuda.
-                                   is_available() else "cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
         self.target_model = deepcopy(model)
         self.sync_target(0)
