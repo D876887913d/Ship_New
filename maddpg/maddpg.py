@@ -45,8 +45,6 @@ class MADDPG(Algorithm):
         self.actor_lr = actor_lr
         self.critic_lr = critic_lr
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = model.to(self.device)
         self.target_model = deepcopy(model)
         self.sync_target(0)
 

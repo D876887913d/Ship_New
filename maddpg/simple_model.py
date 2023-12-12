@@ -2,15 +2,15 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-08 22:28:45
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-12 10:24:08
-FilePath: /Ship_New/maddpg/simple_model.py
+LastEditTime: 2023-12-12 11:11:38
+FilePath: /gongweijing/Ship_New/maddpg/simple_model.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from maddpg.core.torch.model import Model
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class MAModel(Model):
     def __init__(self,
                  obs_dim,
