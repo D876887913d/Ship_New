@@ -2,10 +2,14 @@
  * @Author: gongweijing 876887913@qq.com
  * @Date: 2023-12-04 13:33:29
  * @LastEditors: gongweijing 876887913@qq.com
- * @LastEditTime: 2023-12-10 10:40:54
+ * @LastEditTime: 2023-12-12 19:06:49
  * @FilePath: /gongweijing/Ship_New/readme.md
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
+# 获取训练结果
+tensorboard --logdir=./logs
+
+
 # maddpg的基本依赖方法
 ## env.action_space
 [Discrete(3), Discrete(5)]
