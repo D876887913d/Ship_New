@@ -2,7 +2,7 @@
 Author: gongweijing 876887913@qq.com
 Date: 2023-12-05 19:54:15
 LastEditors: gongweijing 876887913@qq.com
-LastEditTime: 2023-12-11 23:13:11
+LastEditTime: 2023-12-13 10:11:30
 FilePath: /gongweijing/Ship_New/ship_env_deploy.py
 Description: 
 
